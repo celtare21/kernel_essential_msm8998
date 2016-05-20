@@ -1246,7 +1246,7 @@ static inline bool is_via_compact_memory(int order)
 	return order == -1;
 }
 
-static int __compact_finished(struct zone *zone, struct compact_control *cc,
+static enum compact_result __compact_finished(struct zone *zone, struct compact_control *cc,
 			    const int migratetype)
 {
 	unsigned int order;
@@ -1309,8 +1309,9 @@ static int __compact_finished(struct zone *zone, struct compact_control *cc,
 	return COMPACT_NO_SUITABLE_PAGE;
 }
 
-static int compact_finished(struct zone *zone, struct compact_control *cc,
-			    const int migratetype)
+static enum compact_result compact_finished(struct zone *zone,
+			struct compact_control *cc,
+			const int migratetype)
 {
 	int ret;
 
@@ -1329,7 +1330,7 @@ static int compact_finished(struct zone *zone, struct compact_control *cc,
  *   COMPACT_PARTIAL  - If the allocation would succeed without compaction
  *   COMPACT_CONTINUE - If compaction should run now
  */
-static unsigned long __compaction_suitable(struct zone *zone, int order,
+static enum compact_result __compaction_suitable(struct zone *zone, int order,
 					unsigned int alloc_flags,
 					int classzone_idx)
 {
@@ -1375,11 +1376,11 @@ static unsigned long __compaction_suitable(struct zone *zone, int order,
 	return COMPACT_CONTINUE;
 }
 
-unsigned long compaction_suitable(struct zone *zone, int order,
+enum compact_result compaction_suitable(struct zone *zone, int order,
 					unsigned int alloc_flags,
 					int classzone_idx)
 {
-	unsigned long ret;
+	enum compact_result ret;
 
 	ret = __compaction_suitable(zone, order, alloc_flags, classzone_idx);
 	trace_mm_compaction_suitable(zone, order, ret);
@@ -1389,9 +1390,9 @@ unsigned long compaction_suitable(struct zone *zone, int order,
 	return ret;
 }
 
-static int compact_zone(struct zone *zone, struct compact_control *cc)
+static enum compact_result compact_zone(struct zone *zone, struct compact_control *cc)
 {
-	int ret;
+	enum compact_result ret;
 	unsigned long start_pfn = zone->zone_start_pfn;
 	unsigned long end_pfn = zone_end_pfn(zone);
 	const int migratetype = gfpflags_to_migratetype(cc->gfp_mask);
@@ -1535,11 +1536,11 @@ out:
 	return ret;
 }
 
-static unsigned long compact_zone_order(struct zone *zone, int order,
+static enum compact_result compact_zone_order(struct zone *zone, int order,
 		gfp_t gfp_mask, enum migrate_mode mode, int *contended,
 		unsigned int alloc_flags, int classzone_idx)
 {
-	unsigned long ret;
+	enum compact_result ret;
 	struct compact_control cc = {
 		.nr_freepages = 0,
 		.nr_migratepages = 0,
@@ -1577,7 +1578,7 @@ int sysctl_extfrag_threshold = 500;
  *
  * This is the main entry point for direct page compaction.
  */
-unsigned long try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
+enum compact_result try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 		unsigned int alloc_flags, const struct alloc_context *ac,
 		enum migrate_mode mode, int *contended)
 {
@@ -1585,7 +1586,7 @@ unsigned long try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 	int may_perform_io = gfp_mask & __GFP_IO;
 	struct zoneref *z;
 	struct zone *zone;
-	int rc = COMPACT_DEFERRED;
+	enum compact_result rc = COMPACT_DEFERRED;
 	int all_zones_contended = COMPACT_CONTENDED_LOCK; /* init for &= op */
 
 	*contended = COMPACT_CONTENDED_NONE;
@@ -1599,7 +1600,7 @@ unsigned long try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 	/* Compact each zone in the list */
 	for_each_zone_zonelist_nodemask(zone, z, ac->zonelist, ac->high_zoneidx,
 								ac->nodemask) {
-		int status;
+		enum compact_result status;
 		int zone_contended;
 
 		if (compaction_deferred(zone, order))
