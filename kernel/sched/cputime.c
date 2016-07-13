@@ -50,7 +50,6 @@ DEFINE_PER_CPU(seqcount_t, irq_time_seq);
  */
 void irqtime_account_irq(struct task_struct *curr)
 {
-	unsigned long flags;
 	s64 delta;
 	int cpu;
 	u64 wallclock;
@@ -58,8 +57,6 @@ void irqtime_account_irq(struct task_struct *curr)
 
 	if (!sched_clock_irqtime)
 		return;
-
-	local_irq_save(flags);
 
 	cpu = smp_processor_id();
 	wallclock = sched_clock_cpu(cpu);
@@ -87,7 +84,6 @@ void irqtime_account_irq(struct task_struct *curr)
 	else if (curr != this_cpu_ksoftirqd())
 		sched_account_irqstart(cpu, curr, wallclock);
 
-	local_irq_restore(flags);
 }
 EXPORT_SYMBOL_GPL(irqtime_account_irq);
 
