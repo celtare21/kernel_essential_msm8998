@@ -133,12 +133,6 @@ int __cpu_up(unsigned int cpu, struct task_struct *idle)
 	return ret;
 }
 
-static void smp_store_cpu_info(unsigned int cpuid)
-{
-	store_cpu_topology(cpuid);
-	numa_store_cpu_info(cpuid);
-}
-
 /*
  * This is the secondary CPU boot entry.  We're using this CPUs
  * idle thread stack, but a set of temporary page tables.
@@ -186,7 +180,7 @@ asmlinkage void secondary_start_kernel(void)
 	/*
 	 * Enable GIC and timers.
 	 */
-	smp_store_cpu_info(cpu);
+	store_cpu_topology(cpu);
 
 	notify_cpu_starting(cpu);
 
@@ -624,10 +618,13 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 {
 	int err;
 	unsigned int cpu, ncores = num_possible_cpus();
+	unsigned int this_cpu;
 
 	init_cpu_topology();
 
-	smp_store_cpu_info(smp_processor_id());
+	this_cpu = smp_processor_id();
+	store_cpu_topology(this_cpu);
+	numa_store_cpu_info(this_cpu);
 
 	/*
 	 * are we trying to boot more cores than exist?
@@ -662,6 +659,7 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 			continue;
 
 		set_cpu_present(cpu, true);
+                numa_store_cpu_info(cpu);
 		max_cpus--;
 	}
 }
