@@ -2161,6 +2161,7 @@ struct task_struct {
 #ifdef CONFIG_MMU
 	struct task_struct *oom_reaper_list;
 #endif
+	atomic64_t *concurrent_active_time;
 /* CPU-specific state of this task */
 	struct thread_struct thread;
 /*
