@@ -18,7 +18,6 @@
  * General Public License.
  */
 
-#include <linux/iversion.h>
 #include "sdcardfs.h"
 
 /*
@@ -217,7 +216,7 @@ static struct inode *sdcardfs_alloc_inode(struct super_block *sb)
 	i->data = d;
 	kref_init(&d->refcount);
 
-	inode_set_iversion(&i->vfs_inode, 1);
+	i->vfs_inode.i_version = 1;
 	return &i->vfs_inode;
 }
 
