@@ -120,6 +120,14 @@ static int fb_notifier_callback(struct notifier_block *self,
 		pr_debug("evdata is NULL");
 		return 0;
 	}
+	if (!evdata->data) {
+		pr_debug("evdata->data is NULL");
+		return 0;
+	}
+	if (!hbtp_data) {
+		pr_debug("hbtp_data is NULL");
+		return 0;
+	}
 	fbi = evdata->info;
 
 	/*
@@ -132,9 +140,8 @@ static int fb_notifier_callback(struct notifier_block *self,
 		return 0;
 	}
 
-	if (evdata->data && hbtp_data &&
-		(event == FB_EARLY_EVENT_BLANK ||
-		event == FB_R_EARLY_EVENT_BLANK)) {
+	if (event == FB_EARLY_EVENT_BLANK ||
+		event == FB_R_EARLY_EVENT_BLANK) {
 		blank = *(int *)(evdata->data);
 		lcd_state = hbtp->lcd_state;
 		if (event == FB_EARLY_EVENT_BLANK) {
@@ -143,31 +150,17 @@ static int fb_notifier_callback(struct notifier_block *self,
 				pr_debug("%s: receives EARLY_BLANK:UNBLANK\n",
 					__func__);
 				hbtp_fb_early_resume(hbtp_data);
-			} else if (blank == FB_BLANK_POWERDOWN &&
-					lcd_state <= FB_BLANK_NORMAL) {
-				pr_debug("%s: receives EARLY_BLANK:POWERDOWN\n",
-					__func__);
-			} else {
-				pr_debug("%s: receives EARLY_BLANK:%d in %d state\n",
-					__func__, blank, lcd_state);
 			}
 		} else if (event == FB_R_EARLY_EVENT_BLANK) {
 			if (blank <= FB_BLANK_NORMAL) {
 				pr_debug("%s: receives R_EARLY_BALNK:UNBLANK\n",
 					__func__);
 				hbtp_fb_suspend(hbtp_data);
-			} else if (blank == FB_BLANK_POWERDOWN) {
-				pr_debug("%s: receives R_EARLY_BALNK:POWERDOWN\n",
-					__func__);
-			} else {
-				pr_debug("%s: receives R_EARLY_BALNK:%d in %d state\n",
-					__func__, blank, lcd_state);
 			}
 		}
 	}
 
-	if (evdata->data && hbtp_data &&
-		event == FB_EVENT_BLANK) {
+	if (event == FB_EVENT_BLANK) {
 		blank = *(int *)(evdata->data);
 		lcd_state = hbtp->lcd_state;
 		if (blank == FB_BLANK_POWERDOWN &&
@@ -175,12 +168,9 @@ static int fb_notifier_callback(struct notifier_block *self,
 			pr_debug("%s: receives BLANK:POWERDOWN\n", __func__);
 			hbtp_fb_suspend(hbtp_data);
 		} else if (blank <= FB_BLANK_NORMAL &&
-				lcd_state == FB_BLANK_POWERDOWN) {
+			lcd_state == FB_BLANK_POWERDOWN) {
 			pr_debug("%s: receives BLANK:UNBLANK\n", __func__);
 			hbtp_fb_resume(hbtp_data);
-		} else {
-			pr_debug("%s: receives BLANK:%d in %d state\n",
-				__func__, blank, lcd_state);
 		}
 		hbtp_data->lcd_state = blank;
 	}
