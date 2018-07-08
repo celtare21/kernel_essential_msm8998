@@ -41,6 +41,14 @@ GEN_FLAGS := -O3 -fopenmp
 KBUILD_CFLAGS	+= $(GEN_FLAGS)
 
 ifeq ($(cc-name),clang)
+KBUILD_CFLAGS	+= -mllvm -polly \
+					-mllvm -polly-run-dce \
+					-mllvm -polly-run-inliner \
+					-mllvm -polly-opt-fusion=max \
+					-mllvm -polly-ast-use-context \
+					-mllvm -polly-vectorizer=stripmine \
+					-mllvm -polly-detect-keep-going
+
 KBUILD_CFLAGS	+= $(call clang-ifversion, -ge, 0600, -mgeneral-regs-only, -mno-implicit-float)
 else
 KBUILD_CFLAGS	+= -mgeneral-regs-only
