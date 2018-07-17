@@ -2015,8 +2015,8 @@ static ssize_t fuse_dev_splice_write(struct pipe_inode_info *pipe,
 			     GFP_KERNEL);
 	if (!bufs)
 		return -ENOMEM;
+	}
 
-	pipe_lock(pipe);
 	nbuf = 0;
 	rem = 0;
 	for (idx = 0; idx < pipe->nrbufs && rem < len; idx++)
