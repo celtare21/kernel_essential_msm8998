@@ -352,10 +352,10 @@ static int f2fs_page_crypto(struct f2fs_crypto_ctx *ctx,
 			F2FS_XTS_TWEAK_SIZE - sizeof(index));
 
 	sg_init_table(&dst, 1);
-	sg_set_page(&dst, dest_page, PAGE_CACHE_SIZE, 0);
+	sg_set_page(&dst, dest_page, PAGE_SIZE, 0);
 	sg_init_table(&src, 1);
-	sg_set_page(&src, src_page, PAGE_CACHE_SIZE, 0);
-	ablkcipher_request_set_crypt(req, &src, &dst, PAGE_CACHE_SIZE,
+	sg_set_page(&src, src_page, PAGE_SIZE, 0);
+	ablkcipher_request_set_crypt(req, &src, &dst, PAGE_SIZE,
 					xts_tweak);
 	if (rw == F2FS_DECRYPT)
 		res = crypto_ablkcipher_decrypt(req);

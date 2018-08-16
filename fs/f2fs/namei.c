@@ -979,12 +979,12 @@ static const char *f2fs_encrypted_follow_link(struct dentry *dentry, void **cook
 	/* Null-terminate the name */
 	paddr[res] = '\0';
 
-	page_cache_release(cpage);
+	put_page(cpage);
 	return *cookie = paddr;
 errout:
 	kfree(cstr.name);
 	f2fs_fname_crypto_free_buffer(&pstr);
-	page_cache_release(cpage);
+	put_page(cpage);
 	return ERR_PTR(res);
 }
 
