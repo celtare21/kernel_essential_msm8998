@@ -77,7 +77,7 @@
 #include <linux/compiler.h>
 #include <linux/irq.h>
 #include <linux/sched/core_ctl.h>
-#include <linux/cpufreq_times.h>
+#include <linux/cpufreq.h>
 #include <linux/prefetch.h>
 
 #include <asm/switch_to.h>
